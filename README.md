@@ -82,7 +82,7 @@ Fortunately it's an easy fix:
 tar -xf centos-6.7-x86_64-minimal.box
 tar -cf centos-6.7-x86_64-minimal.ova box.ovf box-disk1.vmdk
 # Clean up
-rm -f box-disk1.vmdk box.ovf Vagrantfile centos-6.7-x86_64-minimal.box
+rm -f box-disk1.vmdk box.ovf centos-6.7-x86_64-minimal.box
 ```
 
 ## Upload the OVA to S3
