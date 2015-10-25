@@ -1,0 +1,108 @@
+# Upstream documentation: https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
+
+# Use us keyboard layout, en_US language and UTC time
+keyboard us
+lang en_US.UTF-8
+timezone --utc Etc/UTC
+
+# Install fresh (vs upgrade) from cdrom
+install
+cdrom
+
+# Perform the kickstart installation in text mode (default is graphical)
+text
+# Don't configure X
+skipx
+# Reboot after the installation is successfully completed
+reboot
+# DonThe Setup Agent is not started the first time the system boots
+firstboot --disabled
+
+# Disable password based login for the root account
+# In post install we'll create a user with passwordless sudo access and ssh
+# access via a public ssh key
+rootpw --iscrypted !!
+# Use the SHA-512 hashing algorithm for passwords
+authconfig --passalgo=sha512
+
+
+# Enable networking via DHCP, disable ipv6
+network --bootproto=dhcp --noipv6
+# Configure the default firewall.
+# Allow SSH through. This is needed as public key SSH is the only method of
+# access.
+firewall --enabled --ssh
+
+# Disable selinux
+selinux --disabled
+
+# Initialize any invalid partition tables
+zerombr
+# Install the bootloader to the mbr
+bootloader --location=mbr
+# Erase all partitions that can be reached by the installer
+clearpart --all
+# Create a single ext4 partition mounted at / that uses all available space
+part / --fstype=ext4 --grow --asprimary --size=1
+
+
+# Minimal install set
+%packages --nobase --excludedocs
+@core
+-iscsi-initiator-utils
+-device-mapper-multipath
+%end
+
+%post
+# Create a user with passwordless sudo and ssh public key access
+# Replace the values of these variables with the username and ssh key of your
+# choice.
+SSH_USER=preston4tw
+SSH_USER_KEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDvsx8t10BNuYkbgKyP9j3hF1MLsUGoQ2kzksd6GCPerraOkptPmKPBY0Gn0jscGM/zFs/P5oaUuFxEB1rN77+e2urAwDD6G3iB9xDef4f8L73oXtNiENfFtwA7KwPcTwOYbU8MzqOl/Q4FaDGc29B2G8RDSRk0irVnQT/Cqp1dmI88L9cOLDj4KTyEKkufy/fh8Vx+JoklvVjKcDO27k+8iGahUkBWzKkc8W4ZZSF6yTtq48iSXFQzKY+BRPsnBoGr5ZEvB0Ewoy+hremf+wAnvfW3fHPkaEhERv4zUIRvIpATjaQKsb+s1dHWFzHSF/3O1khF9/U2YH71oHEyCqBv preston4tw@localhost'
+
+# https://github.com/CentOS/ImageStandards
+# "Setup authorized_keys for accounts on the fly or provide via metadata service."
+# Add the SSH_USER to /etc/sysconfig/sshd. This gets used by other scripts for setting up authorized_keys on the fly. For an example, see authorized_keys_ec2.sh.
+echo "SSH_USER=${SSH_USER}" >> /etc/sysconfig/sshd
+
+/usr/sbin/useradd "${SSH_USER}" &&
+  echo "${SSH_USER} ALL=(ALL) NOPASSWD:ALL" >> "/etc/sudoers.d/${SSH_USER}" &&
+  chmod 0440 "/etc/sudoers.d/${SSH_USER}" &&
+  mkdir -m 0700 "/home/${SSH_USER}/.ssh" &&
+  chown "${SSH_USER}.${SSH_USER}" "/home/${SSH_USER}/.ssh" &&
+  echo "${SSH_USER_KEY}" > "/home/${SSH_USER}/.ssh/authorized_keys" &&
+  chown "${SSH_USER}.${SSH_USER}" "/home/${SSH_USER}/.ssh/authorized_keys" &&
+  chmod 600 "/home/${SSH_USER}/.ssh/authorized_keys"
+
+# sshd: disable password authentication. Required to work around an
+# eccentricity of veewee.
+sed -i 's|^PasswordAuthentication yes$|PasswordAuthentication no|' /etc/ssh/sshd_config
+
+# sshd: disable reverse lookups on IP addresses
+echo "UseDNS no" >> /etc/ssh/sshd_config
+
+# Disable the sudo requirement for an interactive session
+# AFAIK this is required for most automation that sudos over ssh: veewee,
+# ansible, etc
+sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
+
+# Set the boot timeout to zero
+sed -i 's/^timeout=.*/timeout=0/' /boot/grub/grub.conf
+# Remove the boot splash image
+sed -i '/^splashimage/d' /boot/grub/grub.conf
+
+# Disable IPv6
+echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf
+echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> /etc/sysctl.conf
+sed -i 's/^IPV6INIT="yes"/IPV6INIT="no"/' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i '/^NETWORKING_IPV6=/d' /etc/sysconfig/network
+echo 'NETWORKING_IPV6=no' >> /etc/sysconfig/network
+chkconfig --del ip6tables
+# Remove NM_CONTROLLED from eth0 config. NetworkManager isn't installed.
+sed -i '/^NM_CONTROLLED/d' /etc/sysconfig/network-scripts/ifcfg-eth0
+# Only enable IPV4 for sshd
+sed -i 's/^#AddressFamily any/AddressFamily inet/' /etc/ssh/sshd_config
+# Remove the hosts entry for IPV6 to enable postfix to start
+sed -i '/::1/d' /etc/hosts
+
+%end
