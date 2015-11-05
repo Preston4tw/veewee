@@ -54,6 +54,8 @@ part / --fstype=ext4 --grow --asprimary --size=1
 %end
 
 %post
+yum -y update kernel
+
 # Create a user with passwordless sudo and ssh public key access
 # Replace the values of these variables with the username and ssh key of your
 # choice.

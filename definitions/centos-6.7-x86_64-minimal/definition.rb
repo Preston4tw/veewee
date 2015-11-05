@@ -40,7 +40,7 @@ Veewee::Session.declare({
     # Customizations for a vagrant box
     #"vagrant.sh",
     # Customizations for a VirtualBox based VM
-    #"virtualbox.sh",
+    "virtualbox.sh",
     # Import the chosen SSH key when instantiating an AMI based on this build
     #"authorized_keys_ec2.sh",
     # In theory: zero out the free space to save space in the final image

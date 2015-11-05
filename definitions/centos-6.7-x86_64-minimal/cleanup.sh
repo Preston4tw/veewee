@@ -50,8 +50,16 @@ rm -rf /tmp/* /tmp/.[^.]+
 
 # Host SSH keys are deleted by overloading :shutdown_cmd as part of
 # definition.rb, which happens when the VM is exported with veewee vbox export:
-# Don't uncomment this! It's just to show what is effectively happening
+# This comment is just to show what is effectively happening
 # rm -f /etc/ssh/ssh_host*
 
+# A number of these will fail depending on if the scripts are included or not
+rm -f /home/${SUDO_USER}/ansible.sh
+rm -f /home/${SUDO_USER}/authorized_keys_ec2.sh
+rm -f /home/${SUDO_USER}/puppet.sh
+rm -f /home/${SUDO_USER}/vagrant.sh
+rm -f /home/${SUDO_USER}/virtualbox.sh
+rm -f /home/${SUDO_USER}/zerodisk.sh
+
 # Delete the cleanup script
-find / -name cleanup.sh -delete
+rm -f /home/${SUDO_USER}/cleanup.sh
