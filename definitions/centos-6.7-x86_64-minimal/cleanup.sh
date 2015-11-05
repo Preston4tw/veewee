@@ -18,7 +18,8 @@ sed -i /HWADDR/d /etc/sysconfig/network-scripts/ifcfg-eth0
 sed -i /UUID/d /etc/sysconfig/network-scripts/ifcfg-eth0
 
 # Remove VBoxGuestAdditions ISO
-find / -name VBoxGuestAdditions_\*.iso -delete
+vbox_version="$(cat /home/${SUDO_USER}/.vbox_version)"
+rm -f /home/${SUDO_USER}/VBoxGuestAdditions_${vbox_version}.iso
 
 # Stop services that log before clearing logs
 service postfix stop
