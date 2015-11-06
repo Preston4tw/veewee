@@ -47,6 +47,9 @@ part / --fstype=ext4 --grow --asprimary --size=1
 
 
 # Minimal install set
+# INFO: If you want to add packages here, keep in mind that the only install
+# source is the minimal ISO. If you want to install packages from the repos, do
+# it in %post
 %packages --nobase --excludedocs
 @core
 -iscsi-initiator-utils
@@ -55,6 +58,7 @@ part / --fstype=ext4 --grow --asprimary --size=1
 
 %post
 yum -y update kernel
+yum -y install yum-utils
 
 # Create a user with passwordless sudo and ssh public key access
 # Replace the values of these variables with the username and ssh key of your

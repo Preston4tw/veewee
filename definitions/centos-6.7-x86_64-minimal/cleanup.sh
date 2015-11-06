@@ -1,4 +1,8 @@
 # Thanks to https://github.com/2creatives/vagrant-centos/
+
+# Remove old kernels. This can't be run in %post of the minimal ISO kickstart as
+# it will error thinking it's the running kernel
+package-cleanup --oldkernels --count=1 -y
 # Cleanup temporary yum files / caches
 yum -y clean all
 
