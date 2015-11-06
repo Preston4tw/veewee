@@ -16,7 +16,7 @@ Veewee::Session.declare({
   :iso_src => "http://mirrors.kernel.org/centos/6.7/isos/x86_64/CentOS-6.7-x86_64-minimal.iso",
   :iso_sha256 => "9d3fec5897be6b3fed4d3dda80b8fa7bb62c616bbfd4bdcd27295ca9b764f498",
   :iso_download_timeout => 1000,
-  :boot_wait => "15",
+  :boot_wait => "10",
   :boot_cmd_sequence => [
     '<Tab> text ks=http://%IP%:%PORT%/ks.cfg<Enter>'
   ],
@@ -30,8 +30,10 @@ Veewee::Session.declare({
   :ssh_host_port => "7222",
   :ssh_guest_port => "22",
   :sudo_cmd => "sudo sh '%f'",
-  # We overload the shutdown command to delete the SSH host keys as well
-  :shutdown_cmd => "rm -f /etc/ssh/ssh_host* ; /sbin/halt -h -p",
+  # We overload the shutdown command to delete the SSH host keys.
+  # veewee uploads the shutdown_cmd into /tmp/shutdown.sh, so have it clean up
+  # after itself.
+  :shutdown_cmd => "rm -f /etc/ssh/ssh_host* ; rm -f /tmp/shutdown.sh ; /sbin/halt -h -p",
   :postinstall_files => [
     # Install puppet
     #"puppet.sh",
