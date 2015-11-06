@@ -47,6 +47,20 @@ yum -y remove \
 # NixOS does not have this problem and is compiled with several kernel options
 # turned on that detect when the kernel is running as a guest. This option might
 # not be needed if the CentOS kernel is compiled with these options.
-if ! grep -q '^[[:space:]]\+kernel .*nolapic_timer' /boot/grub/grub.conf; then
-  sed -i --follow-symlinks 's/^\([[:space:]]\+kernel .*\)/\1 nolapic_timer/' /boot/grub/grub.conf
-fi
+#
+# Additional note: this option has issue when only a single CPU is present and
+# simplistic objective testing suggests this is actually a non-issue.
+# Subjectively however SSH responsiveness (key repeat and top with delay set to
+# 0) feels sluggish without this option.
+# Test used:
+#   time seq 1 $(grep -c '^processor' /proc/cpuinfo) | xargs -n1 -P$(grep -c '^processor' /proc/cpuinfo) sh -c 'echo "scale=5000; a(1)*4" | bc -l'
+#   # CPU |kernel options   |real time|utime    |systime
+#   6     |nolapic_timer    |0m27.143s|2m33.679s|0m4.552s
+#   6     |clocksource=hpet |0m31.829s|3m6.265s |0m0.887s
+#   6     |clocksource=hpet |0m30.493s|2m58.644s|0m0.811s
+#   6     |                 |0m27.927s|2m42.009s|0m0.739s
+
+
+#if ! grep -q '^[[:space:]]\+kernel .*nolapic_timer' /boot/grub/grub.conf; then
+#  sed -i --follow-symlinks 's/^\([[:space:]]\+kernel .*\)/\1 nolapic_timer/' /boot/grub/grub.conf
+#fi
