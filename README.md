@@ -1,6 +1,6 @@
-# veewee generated EBS backed AWS EC2 HVM CentOS 6 AMI
+# veewee generated EBS backed AWS EC2 HVM CentOS 6 AMI from scratch
 This repository contains a veewee definition and some scripts to help you
-create a CentOS 6 EBS backed AWS EC2 HVM AMI.
+create a CentOS 6 EBS backed AWS EC2 HVM AMI from scratch.
 
 # Table of Contents
 * [veewee generated EBS backed AWS EC2 HVM CentOS 6 AMI]
