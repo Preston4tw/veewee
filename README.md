@@ -1,3 +1,10 @@
+# Update: 2016-02-23
+[Packer 0.9.0](https://github.com/mitchellh/packer/blob/master/CHANGELOG.md#090-february-19-2016)
+released 2016-02-19 includes an Amazon import post-processor that appears to
+functionally provide what this repo provides, in addition to all the other
+awesome functionality Packer provides. I highly recommend you take a look at
+Packer for your image building needs.
+
 # veewee generated EBS backed AWS EC2 HVM CentOS 6 AMI from scratch
 This repository contains a veewee definition and some scripts to help you
 create a CentOS 6 EBS backed AWS EC2 HVM AMI from scratch.
